@@ -1,12 +1,12 @@
 import axios, { AxiosError } from "axios";
 
-const API_URL = "https://cautious-space-winner-g479w7v4rgqr39x55-3000.app.github.dev/api";
+const WEATHER_API_URL = (import.meta.env.VITE_WEATHER_API_URL as string | undefined) ?? "http://localhost:5000";
 const SEISMIC_API_URL = "https://65ca483b3b05d29307e01640.mockapi.io/api/seismic";
 
 export const getWeatherData = async (city: string): Promise<WeatherData> => {
   return new Promise<WeatherData>((resolve, reject) => {
     axios
-      .get(`${API_URL}/weather/${city}`)
+      .get(`${WEATHER_API_URL}/weather/${city}`)
       .then((res) => {
         resolve({
           city: city,
@@ -21,12 +21,12 @@ export const getWeatherData = async (city: string): Promise<WeatherData> => {
           const axiosError = error as AxiosError;
           if (axiosError.response?.status === 404) {
             reject("City not found");
+          } else if (axiosError.message === "Network Error") {
+            reject("Cannot reach weather server. Set VITE_WEATHER_API_URL or run the local weather API.");
           } else {
-            // It's a good practice to reject with an Error object
             reject(axiosError.message);
           }
         } else {
-          // Handle non-Axios errors
           reject("An unknown error occurred");
         }
       });
